@@ -39,14 +39,10 @@ class SportBot:
         sum_ore = 0
         sum_km = 0
         for workout in workouts:
-            print("Tempo: ", workout[2], self.convert_time_in_sec(workout[2]))
-            print("Dustanza: ", workout[3])
             sum_ore+=self.convert_time_in_sec(workout[2])
             sum_km+=workout[3]
-        print("Totale ore in sec: ", sum_ore)
-        print("Totale ore: ", self.convert_sec_in_time(sum_ore))
         media = sum_ore/max(len(workouts), 1)
-        ogg = {
+        return {
             "tot_ore" : self.convert_sec_in_time(sum_ore),
             "media_ore" : self.convert_sec_in_time(media),
             "tot_km" : sum_km,
@@ -54,7 +50,6 @@ class SportBot:
             "avg_speed" : round(self.avg_speed(self.convert_sec_in_time(sum_ore), sum_km), 2),
             "tot_works" : len(workouts)
         }
-        return ogg
 
     def save_goal(self, user_id: str, distance: str) -> None:
         res = self.return_goal(user_id)
