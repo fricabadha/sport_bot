@@ -3,7 +3,6 @@ from telegram.ext import Updater, CommandHandler
 from SportBot import SportBot
 import os
 import logging
-import mysql.connector
 import re
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',level=logging.INFO)
@@ -11,11 +10,11 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 load_dotenv()
 sportBot = SportBot()
 
-def start(update, context):
+def start(update, context) -> None:
     update.message.reply_text(
         "Ciao! Sono il tuo assistente per la tracciatura degli allenamenti di corsa. Invia il comando /help per avere la lista dei comandi disponibili.")
 
-def help(update, context):
+def help(update, context) -> None:
     update.message.reply_text("Lista dei comandi disponibili:\n\n"
                               "/start - Avvia il bot\n"
                               "/help - Mostra questo messaggio di aiuto\n"
@@ -25,7 +24,7 @@ def help(update, context):
                               "/stats - Mostra statistiche complessive: Totale e media di km percorsi, tempo impiegato, velocità media\n"
                               "/clear - Elimina tutti i dati.")
 
-def save(update, context):
+def save(update, context) -> None:
     id = update.effective_chat.id
     time, distance = context.args
     rx = r"^([01]?\d|2[0-3]):([0-5]\d):([0-5]\d)$"
@@ -44,35 +43,35 @@ def save(update, context):
     update.message.reply_text("Dati salvati")
 
 
-def history(update, context):
+def history(update, context) -> None:
     id = update.effective_chat.id
     workouts = sportBot.history_workout(id)
     for workout in workouts:
-        update.message.reply_text("Time: %s, Distance: %s, Average Speed: %s" % (workout[2], workout[3], sportBot.avg_speed(workout[2], workout[3])))
+        update.message.reply_text(f"Time: {workout[2]}, Distance: {workout[3]}, Average Speed: {sportBot.avg_speed(workout[2], workout[3])}")
 
     
-def goal(update, context):
+def goal(update, context) -> None:
     id = update.effective_chat.id
     distance = context.args[0]
     sportBot.save_goal(id, distance)
     update.message.reply_text("Obiettivo di distanza memorizzato.")
 
-def stats(update, context):
+def stats(update, context) -> None:
     id = update.effective_chat.id
     res = sportBot.stats_workout(id)
     print(res)
     if res == None:
         update.message.reply_text("Non ci sono allenamenti")
     else:
-        update.message.reply_text("Totale ore: %s,\nMedia ore: %s,\nTotale km: %s,\nMedia km: %s,\nVelocità media: %s,\nTotale allenamenti: %s" % (res["tot_ore"], res["media_ore"], res["tot_km"], res["media_km"],res["avg_speed"], res["tot_works"]))
+        update.message.reply_text(f"Totale ore: {res['tot_ore']},\nMedia ore: {res['media_ore']},\nTotale km: {res['tot_km']},\nMedia km: {res['media_km']},\nVelocità media: {res['avg_speed']},\nTotale allenamenti: {res['tot_works']}" )
 
-def clear(update, context):
+def clear(update, context) -> None:
     id = update.effective_chat.id
     sportBot.clear_history(id)
     update.message.reply_text("Dati eliminati")
     
 
-def error(update, context):
+def error(update, context) -> None:
     print('Update "%s" caused error "%s"' % (update, context.error))
 
 

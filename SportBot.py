@@ -1,36 +1,39 @@
 import mysql.connector
+from dotenv import load_dotenv
 import math
-
-mydb = mysql.connector.connect(
-    host="127.0.0.1",
-    user="root",
-    password="sesso6969",
-    database="sportBot"
-)
-
-conn = mydb.cursor()
-conn.execute("CREATE TABLE IF NOT EXISTS workouts (id BIGINT AUTO_INCREMENT PRIMARY KEY, user_id BIGINT, time TEXT, distance FLOAT)")
-conn.execute(
-    "CREATE TABLE IF NOT EXISTS goals (id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id BIGINT, distance FLOAT)")
-
+import os
+from typing import List, Any
 
 class SportBot:
     def __init__(self) -> None:
-        pass
+        load_dotenv()
+        self.mydb = mysql.connector.connect(
+            host=os.getenv("DB_HOST"),
+            user=os.getenv("DB_USER"),
+            password=os.getenv("DB_PASSWORD"),
+            database=os.getenv("DB_DATABASE")
+        )
 
-    def save_workout(self, user_id, time, distance):
-        conn.execute(
+        self.conn = self.mydb.cursor()
+        self.conn.execute("CREATE TABLE IF NOT EXISTS workouts (id BIGINT AUTO_INCREMENT PRIMARY KEY, user_id BIGINT, time TEXT, distance FLOAT)")
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS goals (id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id BIGINT, distance FLOAT)")
+
+
+
+    def save_workout(self, user_id: str, time: str, distance: str) -> None:
+        self.conn.execute(
             "INSERT into workouts (user_id, time, distance) values (%s, %s, %s)", (user_id, time, distance))
-        mydb.commit()
+        self.mydb.commit()
 
-    def history_workout(self, user_id):
-        conn.execute("SELECT * FROM workouts where user_id = %s", (user_id,))
-        workouts = conn.fetchall()
+    def history_workout(self, user_id: str) -> List[Any]:
+        self.conn.execute("SELECT * FROM workouts where user_id = %s", (user_id,))
+        workouts = self.conn.fetchall()
         return workouts
 
-    def stats_workout(self, user_id):
-        conn.execute("SELECT * FROM workouts where user_id = %s", (user_id,))
-        workouts = conn.fetchall()
+    def stats_workout(self, user_id: str) -> List[Any]:
+        self.conn.execute("SELECT * FROM workouts where user_id = %s", (user_id,))
+        workouts = self.conn.fetchall()
         if len(workouts) == 0:
             return
         sum_ore = 0
@@ -53,30 +56,30 @@ class SportBot:
         }
         return ogg
 
-    def save_goal(self, user_id, distance):
+    def save_goal(self, user_id: str, distance: str) -> None:
         res = self.return_goal(user_id)
         if res:
-            conn.execute("DELETE FROM goals where user_id = %s", (user_id,))
-        conn.execute(
+            self.conn.execute("DELETE FROM goals where user_id = %s", (user_id,))
+        self.conn.execute(
             "INSERT into goals (user_id, distance) values (%s, %s)", (user_id, distance))
-        mydb.commit()
+        self.mydb.commit()
 
-    def return_goal(self, user_id):
-        conn.execute("SELECT * FROM goals where user_id = %s", (user_id,))
-        goals = conn.fetchall()
+    def return_goal(self, user_id: str) -> List[Any]:
+        self.conn.execute("SELECT * FROM goals where user_id = %s", (user_id,))
+        goals = self.conn.fetchall()
         for goal in goals:
             return goal
         return None
 
-    def delete_goal(self, user_id):
-        conn.execute("DELETE FROM goals where user_id = %s", (user_id,))
-        mydb.commit()
+    def delete_goal(self, user_id: str) -> None:
+        self.conn.execute("DELETE FROM goals where user_id = %s", (user_id,))
+        self.mydb.commit()
 
-    def clear_history(self, user_id):
-        conn.execute("DELETE FROM workouts where user_id = %s", (user_id,))
-        mydb.commit()
+    def clear_history(self, user_id:str) -> None:
+        self.conn.execute("DELETE FROM workouts where user_id = %s", (user_id,))
+        self.mydb.commit()
 
-    def avg_speed(self, time, distance):
+    def avg_speed(self, time: str, distance: str) -> float:
         splitted_time = time.split(":")
         sec = int(splitted_time[2])
         min = int(splitted_time[1])
@@ -87,14 +90,14 @@ class SportBot:
 
         return round(distance/ore, 3)
     
-    def convert_time_in_sec(self, time):
+    def convert_time_in_sec(self, time: str) -> float:
         splitted_time = time.split(":")
         sec = int(splitted_time[2])
         min = int(splitted_time[1])
         ore = int(splitted_time[0])
         return (ore*3600)+(min*60)+sec
     
-    def convert_sec_in_time(self, sec):
+    def convert_sec_in_time(self, sec: str) -> str:
         ore = math.floor(sec/3600)
         min = math.floor((sec%3600)/60)
         sec = math.floor((sec%3600)%60)
