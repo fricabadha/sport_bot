@@ -35,7 +35,6 @@ def save(update, context) -> None:
     sportBot.save_workout(id, time, distance)
     
     goal = sportBot.return_goal(id)
-    print(goal)
     if(goal):
         if float(distance) >= float(goal[2]):
             update.message.reply_text("Hai raggiunto il tuo obiettivo, impostane uno nuovo!")
@@ -59,7 +58,6 @@ def goal(update, context) -> None:
 def stats(update, context) -> None:
     id = update.effective_chat.id
     res = sportBot.stats_workout(id)
-    print(res)
     if res == None:
         update.message.reply_text("Non ci sono allenamenti")
     else:
