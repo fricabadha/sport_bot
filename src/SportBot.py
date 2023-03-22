@@ -5,21 +5,19 @@ import os
 from typing import List, Any
 
 class SportBot:
-    def __init__(self) -> None:
+    def __init__(self, connection = None) -> None:
         load_dotenv()
         self.mydb = mysql.connector.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             database=os.getenv("DB_DATABASE")
-        )
+        ) if connection is None else connection
 
         self.conn = self.mydb.cursor()
         self.conn.execute("CREATE TABLE IF NOT EXISTS workouts (id BIGINT AUTO_INCREMENT PRIMARY KEY, user_id BIGINT, time TEXT, distance FLOAT)")
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS goals (id BIGINT AUTO_INCREMENT PRIMARY KEY,user_id BIGINT, distance FLOAT)")
-
-
 
     def save_workout(self, user_id: str, time: str, distance: str) -> None:
         self.conn.execute(
@@ -88,7 +86,7 @@ class SportBot:
     def convert_time_in_sec(self, time: str) -> float:
         splitted_time = time.split(":")
         sec = int(splitted_time[2])
-        min = int(splitted_time[1])
+        min = int(splitted_time[1]) 
         ore = int(splitted_time[0])
         return (ore*3600)+(min*60)+sec
     
