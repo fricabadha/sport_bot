@@ -95,7 +95,7 @@ class SportBot:
         min = math.floor((sec%3600)/60)
         sec = math.floor((sec%3600)%60)
 
-        l = [ore, min, sec]
+        l = [f"{ore:02d}", f"{min:02d}", f"{sec:02d}"]
 
         time = ':'.join(str(n) for n in l)
         return time
