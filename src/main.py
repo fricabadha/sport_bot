@@ -1,14 +1,13 @@
-from dotenv import load_dotenv
-from telegram.ext import Updater, CommandHandler
-from SportBot import SportBot
-import os
 import logging
+import os
+from telegram.ext import Updater, CommandHandler
+from dotenv import load_dotenv
+import sys
+sys.path.append(".")
+from src.SportBot import SportBot
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-load_dotenv()
-sportBot = SportBot()
+sportBot = None
 
 
 def start(update, context) -> None:
@@ -25,6 +24,7 @@ def help(update, context) -> None:
                               "/goal - Imposta un obiettivo di distanza\n"
                               "/stats - Mostra statistiche complessive: Totale e media di km percorsi, tempo impiegato, velocità media\n"
                               "/clear - Elimina tutti i dati.")
+
 
 def save(update, context) -> None:
     res = sportBot.save_workout(
@@ -62,9 +62,15 @@ def clear(update, context) -> None:
     update.message.reply_text("Dati eliminati")
 
 
-if __name__ == "__main__":
-    TOKEN = os.getenv("TOKEN")
-    updater = Updater(TOKEN, use_context=True)
+def main(token: str) -> None:
+    global sportBot
+
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+    sportBot = SportBot()
+
+    updater = Updater(token, use_context=True)
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler("start", start))
@@ -77,3 +83,10 @@ if __name__ == "__main__":
 
     updater.start_polling()
     updater.idle()
+
+
+if __name__ == "__main__":
+    load_dotenv()
+    TOKEN = os.getenv("TOKEN")
+
+    main(TOKEN)
