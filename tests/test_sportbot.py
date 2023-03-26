@@ -43,14 +43,19 @@ class TestSportBot:
         test_data = get_bot()
         bot = test_data["bot"]
         mydb = test_data["mydb"]
-        bot.save_workout(1, "00:30:00", 5)
+        assert bot.save_workout(1, "00:30:00", 5) is False
+
+        bot.save_goal(1, 2)
+        assert bot.save_workout(1, "00:30:00", 5) is True
+        assert bot.save_workout(1, "blabla", 5) is None
+        
         conn = mydb.cursor()
         conn.execute("SELECT * FROM workouts")
         workouts = conn.fetchall()
 
         test_data["mydb"].close()
 
-        assert len(workouts) == 1
+        assert len(workouts) == 2
         assert workouts[0][1] == 1
         assert workouts[0][2] == "00:30:00"
         assert workouts[0][3] == 5
